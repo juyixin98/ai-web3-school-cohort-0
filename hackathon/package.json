@@ -1,0 +1,19 @@
+{
+  "name": "defi-scout",
+  "version": "0.1.0",
+  "description": "AI-driven DeFi quantitative analysis assistant",
+  "type": "module",
+  "scripts": {
+    "scan:dex": "tsx src/dex/scanner.ts",
+    "scan:lending": "tsx src/lending/scanner.ts",
+    "scan:staking": "tsx src/staking/scanner.ts",
+    "scan:all": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "viem": "^2.17.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}
