@@ -1,4 +1,4 @@
-import { type Address, sepolia, mainnet, arbitrum, optimism } from "viem/chains";
+import { type Address, sepolia, mainnet, arbitrum, optimism, base } from "viem/chains";
 
 // ========================
 // RPC
@@ -9,6 +9,7 @@ export const RPC_URLS: Record<number, string> = {
   [sepolia.id]: process.env.RPC_SEPOLIA || "https://rpc.sepolia.org",
   [arbitrum.id]: process.env.RPC_ARBITRUM || "https://arb1.arbitrum.io/rpc",
   [optimism.id]: process.env.RPC_OPTIMISM || "https://mainnet.optimism.io",
+  [base.id]: process.env.RPC_BASE || "https://mainnet.base.org",
 };
 
 // ========================

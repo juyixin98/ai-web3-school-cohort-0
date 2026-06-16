@@ -283,6 +283,8 @@ async function main() {
   return opportunities;
 }
 
-main().catch(console.error);
+// Run only when executed directly, not on import (index.ts drives the pipeline)
+const _isMain = process.argv[1] && !process.argv[1].includes("index");
+if (_isMain) main().catch(console.error);
 
 export { scanPair, findArbitrage, type ArbitrageOpportunity };

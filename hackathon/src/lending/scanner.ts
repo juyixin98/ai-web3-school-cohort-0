@@ -13,7 +13,7 @@ import type { LendingRate } from "./types.js";
 // ---------------------------------------------------------------------------
 
 const aavePoolAbi = parseAbi([
-  "function getReserveData(address asset) view returns (uint256 configuration, uint128 liquidityIndex, uint128 currentLiquidityRate, uint128 variableBorrowIndex, uint128 currentVariableBorrowRate, uint128 currentStableBorrowRate, uint40 lastUpdateTimestamp, uint16 id, address aTokenAddress, address stableDebtTokenAddress, address variableDebtTokenAddress, address interestRateStrategyAddress, uint128 accruedToTreasury, uint8 decimals)",
+  "function getReserveData(address asset) view returns (uint256 configuration, uint256 liquidityIndex, uint256 currentLiquidityRate, uint256 variableBorrowIndex, uint256 currentVariableBorrowRate, uint256 currentStableBorrowRate, uint256 lastUpdateTimestamp, uint256 id, address aTokenAddress, address stableDebtTokenAddress, address variableDebtTokenAddress, address interestRateStrategyAddress, uint256 accruedToTreasury, uint256 decimals)",
 ]);
 
 // ---------------------------------------------------------------------------
@@ -21,12 +21,9 @@ const aavePoolAbi = parseAbi([
 // ---------------------------------------------------------------------------
 
 const compoundAbi = parseAbi([
-  // cUSDCv3 / cWETHv3 on mainnet
-  "function supplyRate() view returns (uint256)",
-  "function borrowRate() view returns (uint256)",
-  "function totalSupply() view returns (uint256)",
-  "function totalBorrows() view returns (uint256)",
-  "function baseToken() view returns (address)",
+  "function getSupplyRate(uint256 utilization) view returns (uint64)",
+  "function getBorrowRate(uint256 utilization) view returns (uint64)",
+  "function getUtilization() view returns (uint256)",
 ]);
 
 // Compound V3 mainnet deployments
@@ -52,11 +49,12 @@ function getClient(): PublicClient {
 // Convert ray (1e27) to APR %
 // ---------------------------------------------------------------------------
 
+// Aave V3 stores currentLiquidityRate / currentVariableBorrowRate
+// as ANNUAL rate in ray (1e27 = 100%). rate/RAY → decimal, *100 → %
 function rayToAPR(rate: bigint): number {
-  const SECONDS_PER_YEAR = 31536000n;
   const RAY = 10n ** 27n;
-  const apr = Number((rate * SECONDS_PER_YEAR * 100n) / RAY) / 100;
-  return Math.round(apr * 1000) / 1000;
+  const pct = Number((rate * 100_000n) / RAY) / 1000;
+  return Math.round(pct * 1000) / 1000;
 }
 
 // Compound rate is per-second, scaled by 1e18
@@ -104,15 +102,17 @@ async function scanCompound(
   symbol: string,
   cToken: `0x${string}`,
 ): Promise<LendingRate> {
-  const facade = getContract({
+  const comet = getContract({
     address: cToken,
     abi: compoundAbi,
     client,
   });
 
+  const util = await comet.read.getUtilization();
+
   const [supply, borrow] = await Promise.all([
-    facade.read.supplyRate(),
-    facade.read.borrowRate(),
+    comet.read.getSupplyRate([util]),
+    comet.read.getBorrowRate([util]),
   ]);
 
   return {
@@ -123,7 +123,7 @@ async function scanCompound(
     borrowAPR: compoundToAPR(borrow),
     totalSupplied: 0,
     totalBorrowed: 0,
-    utilization: 0,
+    utilization: Number(util) / 1e16,
   };
 }
 
@@ -193,6 +193,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+const _isMain = process.argv[1] && !process.argv[1].includes("index");
+if (_isMain) main().catch(console.error);
 
 export { scanAave, scanCompound, type LendingRate };

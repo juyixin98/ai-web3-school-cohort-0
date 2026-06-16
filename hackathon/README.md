@@ -151,10 +151,31 @@ hackathon/
 
 | 项 | 值 |
 |---|---|
-| 网络 | Ethereum Sepolia |
-| RPC | Infura / Alchemy |
-| 合约地址 | Sepolia 上的 Uniswap/Aave/Compound/Lido 测试部署 |
-| 测试币 | Sepolia ETH + 测试 USDC/Mock Token |
+| 数据读取 | Ethereum Mainnet（免费公共 RPC） |
+| 交易执行 | Sepolia 测试网 |
+| RPC | eth.drpc.org / rpc.ankr.com / cloudflare-eth.com |
+| 合约 | 已验证的 mainnet 合约地址 |
+
+## 当前状态
+
+```
+✅ DEX Scanner       Uniswap V2 / SushiSwap V2        3 pairs，实时价差
+✅ Lending Scanner   Aave V3 / Compound V3            跨协议利差对比
+✅ Staking Scanner   Lido / Rocket Pool / Frax        3 个 LST 收益排行
+⚠️ Bridge Scanner    跨链 4 链框架                     待验证 L2 合约地址
+✅ Agent Analyzer    机会聚合 / 风险评分 / 排序         市场快照 + TOP 5
+✅ AI Prompts        系统提示词 / 对话模板 / 快捷提问    可集成 Claude/OpenAI API
+✅ Guard             6 重校验                          复用 005 实验设计
+```
+
+## 实测数据快照（2026-06-11）
+
+```
+最优质押:  Rocket Pool rETH @ 16.54% APR
+最优存款:  USDC → Aave V3 @ 3.09%
+DEX 套利:  价差 0.15%，扣除 gas 后无利润
+存贷套利:  Compound 借 USDC @ 0.03% → Aave 存 @ 3.09% (利差 3.06%)
+```
 | 语言 | TypeScript |
 | 运行时 | Node.js 20+ |
 
